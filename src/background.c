@@ -8,13 +8,16 @@ typedef enum{ //Estados posibles para un job
     TERMINADO
 } estadoJob;
 
-typedef struct { //struct de job
+typedef struct { //Struct de job para almacenar en su array
     pid_t pid;
     char comando[256];
     estadoJob estado;
 } job;
 
+job tabla_jobs[64]; //Arreglo que contendrá los jobs en EJECTUANDO
+
 void manejador_sigchld(int senal){ //Función que contiene lo que se hará al recibir la señal
+    (void)senal; //Para evitar warning
 }
 
 void background_iniciar() { //Función para inicializar el manejo de procesos en bg, se llama al iniciar la shell
