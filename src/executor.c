@@ -10,6 +10,7 @@
 #include "../include/executor.h"
 #include "../include/redirections.h"
 #include "../include/signals.h"
+#include "../include/background.h"
 
 int crear_proceso(char **args) {
     // Validación de comando vacío
@@ -55,6 +56,23 @@ int crear_proceso(char **args) {
 
 int ejecutar_comando(char **args) {
 
+    //Comprobación de plano del proceso (primero o segundo)
+    //Se comprueba si el comando terminaba con "&", para marcarlo como proceso que irá a background además de quitar el carácter del arreglo de tokens
+    int es_background = 0; 
+
+    if (args != NULL){
+        int i = 0;
+        while(args[i] != NULL){ //Se avanza hasta encontrar el marcador de fin
+            i++;
+        }
+    
+        //Si hay al menos un token y el ultimo es "&", se trata de background
+        if(i > 0 && strcmp(args[i - 1], "&") == 0){ //Se compara el ultimo token real
+            es_background = 1; //Se marca que el comando es background
+            args[i - 1] = NULL; //Se elimina el "&" para que execvp no lo reciba
+        }
+    }
+
     // Se llama a la función para crear al hijo
     pid_t pid = crear_proceso(args);
     
@@ -62,23 +80,42 @@ int ejecutar_comando(char **args) {
     if (pid < 0) {
         return -1;
     }
-    
-    // El padre, es decir la shell, espera a que el hijo termine de ejecutar el comando y recibe el resultado
-    int status;
-    if (waitpid(pid, &status, 0) < 0) {
-        perror("waitpid");
-        return -1;
+
+    if (es_background){
+        //Al entrar al condicional se reconstruyen los tokens del comando en texto para pasárselo a la función de agregar jobs
+        char comando[256]; //Buffer donde se va a armar el texto completo
+        comando[0] = '\0'; //Se deja vacio a proposito, strcat necesita saber donde empieza a escribir
+
+        for(int j = 0; args[j] != NULL; j++){ //Se recorre cada palabra del comando
+            strcat(comando, args[j]); //Se agrega la palabra actual al final del buffer
+            if(args[j + 1] != NULL){ //Si todavia queda otra palabra despues se agrega un espacio antes de la siguiente
+                strcat(comando, " "); 
+             }
+        }
+
+        background_agregar_job(pid, comando); //Se agrega el proceso al arreglo de jobs 
+
+        return 0;
     }
 
-    // Se revisa como termino el proceso
-    if (WIFEXITED(status)) {
-        // Si termino de forma natural entonces se retorna el codigo entregado
-        return WEXITSTATUS(status);
-    } else if (WIFSIGNALED(status)) {
-        // Termino por una señal externa
-        fprintf(stderr, "\n");
-        return 128 + WTERMSIG(status);
+    else{
+        // El padre, es decir la shell, espera a que el hijo termine de ejecutar el comando y recibe el resultado
+        int status;
+        if (waitpid(pid, &status, 0) < 0) {
+            perror("waitpid");
+            return -1;
+        }
+
+        // Se revisa como termino el proceso
+        if (WIFEXITED(status)) {
+            // Si termino de forma natural entonces se retorna el codigo entregado
+            return WEXITSTATUS(status);
+        } else if (WIFSIGNALED(status)) {
+            // Termino por una señal externa
+            fprintf(stderr, "\n");
+            return 128 + WTERMSIG(status);
+        }
+        
+        return 0; // Si todo sale bien finaliza el programa
     }
-    
-    return 0; // Si todo sale bien finaliza el programa
- }
+}
