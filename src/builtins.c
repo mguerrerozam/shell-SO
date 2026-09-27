@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include "../include/builtins.h"
 
-
 static int builtin_cd(char **tokens) {
     char *destino;
     //Si no se proporciona un directorio destino, se asume el directorio HOME del usuario
@@ -39,6 +38,11 @@ static int builtin_exit(char **tokens) {
     }
     exit(codigo);//Termina la shell con el codigo especificado (0 por defecto)
 }
+static int builtin_jobs(char **tokens) {
+    (void)tokens;
+    background_listar_jobs();
+    return 0;
+}
 
 int es_builtin(const char *cmd)
 {
@@ -58,9 +62,9 @@ int ejecutar_builtin(char **tokens) {
         return builtin_cd(tokens);
     if (strcmp(tokens[0], "exit") == 0)
         return builtin_exit(tokens);
-    if (strcmp(tokens[0], "jobs") == 0 || //Por ahora valen 0, Maxi rellena con sus funciones
-        strcmp(tokens[0], "pmon") == 0) {
-        return 0;
-    }
+    if (strcmp(tokens[0], "jobs") == 0)
+        return builtin_jobs(tokens);
+    if (strcmp(tokens[0], "pmon") == 0)
+        return ejecutar_pmon(tokens); //ToDo
     return 1;
 }
