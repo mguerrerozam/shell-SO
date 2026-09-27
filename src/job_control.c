@@ -1,7 +1,7 @@
 //
 // Created by pancho on 26-09-26.
 //
-#include "job_control.h"
+#include "../include/job_control.h"
 
 void ejecutar_fg(pid_t pid_hijo) {
     int status;

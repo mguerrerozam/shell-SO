@@ -1,4 +1,4 @@
-#include "signals.h"
+#include "../include/signals.h"
 
 void configurar_senales_shell(void) {
     struct sigaction sa;

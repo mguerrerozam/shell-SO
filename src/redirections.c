@@ -1,4 +1,4 @@
-#include "redirections.h"
+#include "../include/redirections.h"
 
 void procesar_redirecciones(char **args) {
     int i = 0;
