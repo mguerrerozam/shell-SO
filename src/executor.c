@@ -7,10 +7,9 @@
 #include <errno.h>
 #include <string.h>
 
-
-#include "executor.h"
-#include "redirections.h" 
-#include "signals.h"
+#include "../include/executor.h"
+#include "../include/redirections.h"
+#include "../include/signals.h"
 
 int crear_proceso(char **args) {
     // Validación de comando vacío
