@@ -1,6 +1,7 @@
 #include "../include/background.h"
 #include <signal.h>
 #include <stdio.h>
+#include <sys/types.h>
 
 typedef enum{ //Estados posibles para un job
     EJECUTANDO,
@@ -8,7 +9,7 @@ typedef enum{ //Estados posibles para un job
 } estadoJob;
 
 typedef struct { //struct de job
-    int pid;
+    pid_t pid;
     char comando[256];
     estadoJob estado;
 } job;
