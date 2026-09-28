@@ -83,6 +83,7 @@ int main(void) {
             n--;
         }
 
+        // Construye un string para guardar el comando en jobs
         char cmd_str[256] = "";
         for (int i = 0; tokens[i] != NULL; i++) {
             if (i > 0) strncat(cmd_str, " ", sizeof(cmd_str) - strlen(cmd_str) - 1);
@@ -107,23 +108,25 @@ int main(void) {
                 iniciar_pipes(comandos, num_comandos);//Ejecucion con redireccion IPC
         } else {
     
+    // Comando simple
     if (num_comandos == 1) {
-        pid_t pid = crear_proceso(comandos[0], 1);
+        pid_t pid = crear_proceso(comandos[0], 1); // Se crea el proceso hijo
         if (pid > 0) {
-            setpgid(pid, pid);
-            background_agregar_job(pid, cmd_str);
+            setpgid(pid, pid); 
+            background_agregar_job(pid, cmd_str); // Se añade el proceso a jobs
         }
+    // Pipelines
     } else {
-        pid_t pid = fork();
+        pid_t pid = fork(); // proceso hijo para gestionar las pipes en segundo plano
         if (pid < 0) {
             perror("fork");
         } else if (pid == 0) {
             restaurar_senales_hijo();
             setpgid(0, 0);
             iniciar_pipes(comandos, num_comandos);
-            exit(0);
+            exit(0); // termino con exito
         } else {
-            background_agregar_job(pid, cmd_str);
+            background_agregar_job(pid, cmd_str); // se registra el resultado del proceso hijo
         }
     }
 }

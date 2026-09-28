@@ -30,7 +30,7 @@ int crear_proceso(char **args, int background) {
     // Proceso del hijo
     if (pid == 0) {
         
-        // Se separa al hijo en su propio grupo de procesos para evitar problemas con las señales de teclado
+        // Si esta en segundo plano, se separa al hijo en su propio grupo de procesos para evitar problemas con las señales de teclado
         if (background) setpgid(0, 0);
 
         // La shell ignora Ctrl + C por ende se llama a las señales para que el hijo si responda

@@ -61,8 +61,8 @@ int iniciar_pipes(char ***comandos, int num_comandos) {
                 close(pipes[j][1]);
             }
 
-            restaurar_senales_hijo();          
-            procesar_redirecciones(comandos[i]);
+            restaurar_senales_hijo(); // Para las señales de teclado         
+            procesar_redirecciones(comandos[i]); // Revisa y lee los simbolos <, >, >>
 
             // Se reemplaza el proceso actual por el comando real
             execvp(comandos[i][0], comandos[i]);
