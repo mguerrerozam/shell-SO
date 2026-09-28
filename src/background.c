@@ -7,18 +7,6 @@
 #include <string.h>
 #define MAX_JOBS 64 //Máximo de jobs que cabrán en el arreglo de jobs
 
-typedef enum{ //Estados posibles para un job
-    LIBRE, //Se distingue de "TERMINADO" porque el estado libre se da una vez que ya se avisó al usuario que el proceso finalizó con éxito
-    EJECUTANDO,
-    TERMINADO
-} estadoJob;
-
-typedef struct { //Struct de job para almacenar en su array
-    pid_t pid;
-    char comando[256];
-    estadoJob estado;
-} job;
-
 job tabla_jobs[MAX_JOBS]; //Arreglo que contendrá los jobs en EJECTUANDO
 
 int cantidad_jobs = 0;
@@ -60,6 +48,7 @@ void background_agregar_job(pid_t pid, char comando[256]) { //Función que recib
         if (tabla_jobs[i].estado == LIBRE){
             tabla_jobs[i].pid = pid; //Asigna pid
             strcpy(tabla_jobs[i].comando, comando); //Asigna comando
+            tabla_jobs[i].lectura_valida = 0; //Evita que un job nuevo herede datos de CPU de quien usó esa posición antes
             tabla_jobs[i].estado = EJECUTANDO; //Cambia el estado para que en una próxima iteración no usen su lugar
             cantidad_jobs++; //Aumenta número de jobs activos
             printf("[%d] %d\n", i + 1, pid); //Se avisa de inmediato el numero de job y el pid
