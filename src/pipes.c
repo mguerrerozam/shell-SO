@@ -8,6 +8,8 @@
 
 #include "../include/pipes.h"
 #include "../include/executor.h"
+#include "../include/redirections.h"
+#include "../include/signals.h"
 
 int iniciar_pipes(char ***comandos, int num_comandos) {
     // Si no hay comandos exito
@@ -58,6 +60,9 @@ int iniciar_pipes(char ***comandos, int num_comandos) {
                 close(pipes[j][0]);
                 close(pipes[j][1]);
             }
+
+            restaurar_senales_hijo();          
+            procesar_redirecciones(comandos[i]);
 
             // Se reemplaza el proceso actual por el comando real
             execvp(comandos[i][0], comandos[i]);

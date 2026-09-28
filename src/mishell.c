@@ -54,6 +54,7 @@ int main(void) {
     while (1) {
         //Se genera el texto del promt con la ruta actual de ejecucion.
         construir_promt(prompt, sizeof(prompt));
+        background_avisar_terminados();
 
         //Se lee la entrada del usuario, Si retorna NULL, el usuario presiono Ctrl+D
         linea = leer_linea(prompt);
@@ -81,6 +82,12 @@ int main(void) {
             tokens[n - 1] = NULL; // Eliminamos el '&' para que execvp no intente ejecutarlo como argumento
             n--;
         }
+
+        char cmd_str[256] = "";
+        for (int i = 0; tokens[i] != NULL; i++) {
+            if (i > 0) strncat(cmd_str, " ", sizeof(cmd_str) - strlen(cmd_str) - 1);
+            strncat(cmd_str, tokens[i], sizeof(cmd_str) - strlen(cmd_str) - 1);
+        }
         //Se ejecutan los built-in directamente en el proceso principal.
         if (es_builtin(tokens[0])) {
             ejecutar_builtin(tokens);
@@ -99,34 +106,27 @@ int main(void) {
             else
                 iniciar_pipes(comandos, num_comandos);//Ejecucion con redireccion IPC
         } else {
-            //Background, se bifurca la shell para no bloquear el promt
-            pid_t pid = fork();
-
-            if (pid < 0) {
-                perror("fork");//Error al crear el proceso.
-            } else if (pid == 0) {
-                //Proceso hijo.
-                restaurar_senales_hijo();
-                setpgid(0, 0); //Aislamos procesos para inmunizarlos de Ctrl+C.
-                if (num_comandos == 1)
-                    ejecutar_comando(comandos[0]);
-                else
-                    iniciar_pipes(comandos, num_comandos);
-
-                exit(0);//El hijo debe morir tras ejecutar, no debe volver al bucle while.
-            } else {
-                //El proceso padre: la shell
-                //Reconstruye el comando como string y registra el PID en la lista de jobs para trackearlo.
-                char cmd_str[265] = "";
-                for (int i = 0; tokens[i] != NULL; i++) {
-                    if (i>0) {
-                        strncat(cmd_str, " ", sizeof(cmd_str) - strlen(cmd_str) - 1);
-                    }
-                    strncat(cmd_str, tokens[i], sizeof(cmd_str) - strlen(cmd_str) - 1);
-                }
-                background_agregar_job(pid, cmd_str);
-            }
+    
+    if (num_comandos == 1) {
+        pid_t pid = crear_proceso(comandos[0], 1);
+        if (pid > 0) {
+            setpgid(pid, pid);
+            background_agregar_job(pid, cmd_str);
         }
+    } else {
+        pid_t pid = fork();
+        if (pid < 0) {
+            perror("fork");
+        } else if (pid == 0) {
+            restaurar_senales_hijo();
+            setpgid(0, 0);
+            iniciar_pipes(comandos, num_comandos);
+            exit(0);
+        } else {
+            background_agregar_job(pid, cmd_str);
+        }
+    }
+}
         //Limpiamos la memoria de los tokens de esta iteracion antes de la siguiente.
         liberar_tokens(tokens);
     }

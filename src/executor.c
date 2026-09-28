@@ -12,7 +12,7 @@
 #include "../include/signals.h"
 #include "../include/background.h"
 
-int crear_proceso(char **args) {
+int crear_proceso(char **args, int background) {
     // Validación de comando vacío
     if (args == NULL || args[0] == NULL) {
         return 1; 
@@ -31,7 +31,7 @@ int crear_proceso(char **args) {
     if (pid == 0) {
         
         // Se separa al hijo en su propio grupo de procesos para evitar problemas con las señales de teclado
-        setpgid(0, 0);
+        if (background) setpgid(0, 0);
 
         // La shell ignora Ctrl + C por ende se llama a las señales para que el hijo si responda
         restaurar_senales_hijo();
@@ -74,7 +74,7 @@ int ejecutar_comando(char **args) {
     }
 
     // Se llama a la función para crear al hijo
-    pid_t pid = crear_proceso(args);
+    pid_t pid = crear_proceso(args, es_background);
     
     // Por si hubo un error
     if (pid < 0) {
