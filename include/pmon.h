@@ -1,8 +1,6 @@
-//
-// Created by lolel on 13/9/2026.
-//
+#ifndef PMON_H
+#define PMON_H
 
-#ifndef TAREA1_PMON_H
-#define TAREA1_PMON_H
+int ejecutar_pmon(char **tokens);
 
-#endif //TAREA1_PMON_H
+#endif
