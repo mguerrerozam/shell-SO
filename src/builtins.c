@@ -65,6 +65,6 @@ int ejecutar_builtin(char **tokens) {
     if (strcmp(tokens[0], "jobs") == 0)
         return builtin_jobs(tokens);
     if (strcmp(tokens[0], "pmon") == 0)
-        return 0; //ToDo
+        return ejecutar_pmon(tokens);
     return 1;
 }
