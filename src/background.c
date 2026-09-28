@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <stdlib.h>
+#include <sys/wait.h>
+#include <string.h>
 #define MAX_JOBS 64 //Máximo de jobs que cabrán en el arreglo de jobs
 
 typedef enum{ //Estados posibles para un job
@@ -33,6 +35,7 @@ void manejador_sigchld(int senal){ //Función que contiene todo lo que se hará 
                 break;
             }
         }
+        pid_terminado = waitpid(-1, &status, WNOHANG);
     }
 }
 
@@ -56,7 +59,7 @@ void background_agregar_job(pid_t pid, char comando[256]) { //Función que recib
     for(int i = 0; i < MAX_JOBS; i++){ //Busca la primera posición con un job en estado "LIBRE" para poder escribir cada dato sobre él
         if (tabla_jobs[i].estado == LIBRE){
             tabla_jobs[i].pid = pid; //Asigna pid
-            strcopy(tabla_jobs[i].comando, comando); //Asigna comando
+            strcpy(tabla_jobs[i].comando, comando); //Asigna comando
             tabla_jobs[i].estado = EJECUTANDO; //Cambia el estado para que en una próxima iteración no usen su lugar
             cantidad_jobs++; //Aumenta número de jobs activos
             printf("[%d] %d\n", i + 1, pid); //Se avisa de inmediato el numero de job y el pid
