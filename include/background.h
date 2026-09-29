@@ -1,6 +1,7 @@
 #ifndef BACKGROUND_H
 #define BACKGROUND_H
 #include <sys/types.h>
+#include <time.h>
 typedef enum{ //Estados posibles para un job
     LIBRE, //Se distingue de "TERMINADO" porque el estado libre se da una vez que ya se avisó al usuario que el proceso finalizó con éxito
     EJECUTANDO,
