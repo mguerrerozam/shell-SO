@@ -42,8 +42,7 @@ static int leer_proc_stat(pid_t pid, char *estado, unsigned long *utime, unsigne
         return -1; //Se avisa del error
     }
 
-    sscanf(cierre_parentesis + 1, " %c %*d %*d %*d %*d %*d %*u %*lu %*lu %*lu %*lu %lu %lu",
-           estado, utime, stime); //Se saltan los campos intermedios y se leen los que interesan
+    sscanf(cierre_parentesis + 1, " %c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu %lu", estado, utime, stime); //Se saltan los campos intermedios y se leen los que interesan
 
     return 0; //Todo salio bien
 }
